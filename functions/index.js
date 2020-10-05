@@ -4,7 +4,8 @@ const FBAuth = require("./util/fbAuth");
 
 const { db } = require("./util/admin");
 
+const { signup } = require("./handlers/users");
 
-app.post("/signup", (req, res))
+app.post("/signup", signup);
 
-exports.api = functions.https.onRequest(app)
+exports.api = functions.https.onRequest(app);
