@@ -1,16 +1,22 @@
 const { admin, db } = require("../util/admin");
 
-const config = require("../util/config");
+const {
+  firebaseConfig,
+  twilioConfig: { accountSid, authToken },
+} = require("../util/config");
 const { uuid } = require("uuidv4");
 
 const firebase = require("firebase");
-firebase.initializeApp(config);
+firebase.initializeApp(firebaseConfig);
 
 const {
   validateLoginData,
   validateSignupData,
+  validatePhone,
   reduceUserDetails,
 } = require("../util/validators");
+
+const client = require("twilio")(accountSid, authToken);
 
 // Sign users up
 //TODO: Signup with google, appleId, etc
@@ -64,5 +70,46 @@ exports.signup = (req, res) => {
           .status(500)
           .json({ general: "Something went wrong, please try again" });
       }
+    });
+};
+
+exports.sendOTP = async (req, res) => {
+  const phoneNumber = req.body.phone;
+
+  const { errors, valid, number } = await validatePhone(phoneNumber);
+
+  if (!valid) return res.status(400).json(errors);
+
+  client.verify
+    .services("VAb51a99dc6d48c612a24deb5e0180cb62")
+    .verifications.create({ to: number, channel: "sms" })
+    .then((verification) => {
+      console.log(verification.status);
+      return res.status(200).json({ message: "OTP sent" });
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(400).json({ error: err.message });
+    });
+};
+
+exports.checkOTP = (req, res) => {
+  const OTP = req.body.OTP;
+  const phone = req.body.phone;
+
+  client.verify
+    .services("VAb51a99dc6d48c612a24deb5e0180cb62")
+    .verificationChecks.create({ to: phone, code: OTP })
+    .then((verification_check) => {
+      console.log(verification_check.status);
+      if (verification_check.status == "approved") {
+        return res.status(200).json({ verification_check });
+      } else {
+        return res.status(400).json({ verification_check });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(400).json({ error: err.message });
     });
 };

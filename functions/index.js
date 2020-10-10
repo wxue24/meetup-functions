@@ -4,8 +4,10 @@ const FBAuth = require("./util/fbAuth");
 
 const { db } = require("./util/admin");
 
-const { signup } = require("./handlers/users");
+const { signup, sendOTP, checkOTP } = require("./handlers/users");
 
 app.post("/signup", signup);
+app.post("/sendOTP", sendOTP);
+app.post("/checkOTP", checkOTP);
 
 exports.api = functions.https.onRequest(app);

@@ -1,3 +1,8 @@
+const {
+  twilioConfig: { accountSid, authToken },
+} = require("../util/config");
+const client = require("twilio")(accountSid, authToken);
+
 const isEmpty = (string) => {
   if (string.trim() === "") return true;
   else return false;
@@ -11,7 +16,12 @@ const isEmail = (email) => {
 };
 
 const isPhone = (phone) => {
-  //TODO validate phone number
+  return client.lookups
+    .phoneNumbers(phone)
+    .fetch()
+    .then((phone_number) => {
+      return phone_number.phoneNumber;
+    });
 };
 
 exports.validateSignupData = (data) => {
@@ -25,8 +35,7 @@ exports.validateSignupData = (data) => {
   if (data.password !== data.confirmPassword)
     errors.confirmPassword = "Passwords must match";
   if (isEmpty(data.handle)) errors.handle = "Must not be empty";
-  //   if (!isPhone(data.phone))
-  //     errors.phone = "Phone number must be in (XXX)-XXX-XXXX format";
+
   return {
     errors,
     valid: Object.keys(errors).length > 0 ? false : true,
@@ -40,6 +49,27 @@ exports.validateLoginData = (data) => {
   return {
     errors,
     valid: Object.keys(errors).length > 0 ? false : true,
+  };
+};
+
+exports.validatePhone = async (phone) => {
+  let errors = {};
+  let number = null;
+
+  if (isEmpty(phone)) {
+    return { ...data, error: "Must not be empty" };
+  } else {
+    const formatedNumber = await isPhone(phone);
+    if (!formatedNumber) {
+      errors.phone = "Number is not valid";
+    } else {
+      number = formatedNumber;
+    }
+  }
+  return {
+    errors,
+    valid: Object.keys(errors).length > 0 ? false : true,
+    number,
   };
 };
 
