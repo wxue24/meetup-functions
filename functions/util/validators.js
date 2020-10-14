@@ -27,8 +27,6 @@ const isPhone = (phone) => {
     });
 };
 
-
-
 exports.validateSignupData = (data) => {
   let errors = {};
   if (isEmpty(data.email)) {
@@ -126,7 +124,8 @@ exports.isLocation = (location) => {
       else return null;
     })
     .catch((err) => {
-      console.log(err);
+      console.log(err.message);
+      console.log(err.response.data.response.errors)
       return null;
     });
 };

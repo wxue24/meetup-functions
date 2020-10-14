@@ -153,6 +153,8 @@ exports.validateAddress = async (req, res) => {
   if (!validated) return res.status(400).json({ error: "Not a valid address" });
   else {
     //TODO Add location to firebase
+    const handle = req.user.handle
+    console.log(handle)
     return res.status(200).json({ message: "Successfully added address!" });
   }
 };
