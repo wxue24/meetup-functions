@@ -25,7 +25,6 @@ let db = {
       },
       socialMediaHandles: {
         instagram: "user123",
-        snapchat: "user234",
       },
       friends: [
         {

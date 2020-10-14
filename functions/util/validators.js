@@ -1,5 +1,8 @@
+const axios = require("axios");
+
 const {
   twilioConfig: { accountSid, authToken },
+  UPSConfig,
 } = require("../util/config");
 const client = require("twilio")(accountSid, authToken);
 
@@ -24,6 +27,8 @@ const isPhone = (phone) => {
     });
 };
 
+
+
 exports.validateSignupData = (data) => {
   let errors = {};
   if (isEmpty(data.email)) {
@@ -41,7 +46,6 @@ exports.validateSignupData = (data) => {
     valid: Object.keys(errors).length > 0 ? false : true,
   };
 };
-
 
 exports.validateLoginData = (data) => {
   let errors = {};
@@ -74,11 +78,55 @@ exports.validatePhone = async (phone) => {
   };
 };
 
-exports.reduceUserDetails = (data) => {
-  let userDetails = {};
+//TODO Client side validation: Empty fields
+exports.reduceUserDetails = async (data) => {
+  let errors = {};
+  let userDetails = data
+  
+  // if (Object.keys(data.socialMediaHandles) === 0)
+  //   errors.socialMediaHandles = "Must have at least one social media account";
 
-  if (!isEmpty(data.location.trim())) userDetails.location = data.location;
-  // TODO: first, last, school, grade...
+  return {
+    errors,
+    valid: Object.keys(errors).length > 0 ? false : true,
+    userDetails
+  };
+};
 
-  return userDetails;
+exports.isLocation = (location) => {
+  const data = JSON.stringify({
+    XAVRequest: {
+      AddressKeyFormat: {
+        AddressLine: location.address,
+        PoliticalDivision2: location.city,
+        PoliticalDivision1: location.state,
+        PostcodePrimaryLow: location.zip,
+        CountryCode: location.country,
+      },
+    },
+  });
+
+  const config = {
+    method: "post",
+    url: "https://onlinetools.ups.com/addressvalidation/v1/1",
+    headers: {
+      AccessLicenseNumber: UPSConfig.AccessLicenseNumber,
+      Username: UPSConfig.Username,
+      Password: UPSConfig.Password,
+    },
+    data: data,
+  };
+  //If valid or close to valid returns the address in AddressKeyFormat 
+  //Else returns null
+  return axios(config)
+    .then((res) => {
+      if (res.data.XAVResponse.ValidAddressIndicator === ""){
+        return res.data.XAVResponse.Candidate.AddressKeyFormat
+      }
+      else return null;
+    })
+    .catch((err) => {
+      console.log(err);
+      return null;
+    });
 };

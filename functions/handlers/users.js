@@ -14,6 +14,7 @@ const {
   validateSignupData,
   validatePhone,
   reduceUserDetails,
+  isLocation,
 } = require("../util/validators");
 
 const client = require("twilio")(accountSid, authToken);
@@ -137,3 +138,25 @@ exports.checkOTP = (req, res) => {
       return res.status(400).json({ error: err.message });
     });
 };
+
+exports.register = async (req, res) => {
+  const data = req.body;
+
+  const { valid, errors, userDetails } = await reduceUserDetails(data);
+  if (!valid) return res.status(400).json(errors);
+  else return res.status(200).json(userDetails);
+};
+
+exports.validateAddress = async (req, res) => {
+  const address = req.body;
+  const validated = await isLocation(address);
+  if (!validated) return res.status(400).json({ error: "Not a valid address" });
+  else {
+    //TODO Add location to firebase
+    return res.status(200).json({ message: "Successfully added address!" });
+  }
+};
+
+exports.connectSocialMedia = async (req, res) => {};
+
+exports.editUserDetails = (req, res) => {};
