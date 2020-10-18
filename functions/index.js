@@ -11,17 +11,17 @@ const {
   checkOTP,
   register,
   validateAddress,
-  connectSocialMedia,
   editUserDetails,
+  getInstagramHandle
 } = require("./handlers/users");
 
 app.post("/signup", signup);
 app.post("/login", login);
-app.post("/user/:handle/sendOTP", sendOTP);
-app.post("/user/:handle/checkOTP", checkOTP);
-app.post("/user/:handle/register", FBAuth, register);
-app.post("/user/:handle/address", FBAuth, validateAddress);
-app.post("/user/:handle/socialmedia", FBAuth, connectSocialMedia);
-app.post("/user/:handle/edit", FBAuth, editUserDetails);
+app.post("/:handle/sendOTP", sendOTP);
+app.post("/:handle/checkOTP", checkOTP);
+app.post("/:handle/register", FBAuth, register);
+app.post("/:handle/address", FBAuth, validateAddress);
+app.post("/:handle/instagram", FBAuth, getInstagramHandle);
+app.post("/:handle/edit", FBAuth, editUserDetails);
 
 exports.api = functions.https.onRequest(app);

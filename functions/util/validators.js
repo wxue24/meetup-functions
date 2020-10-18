@@ -1,8 +1,8 @@
 const axios = require("axios");
 
 const {
-  twilioConfig: { accountSid, authToken },
-  UPSConfig,
+  twilio: { accountSid, authToken },
+  ups,
 } = require("../util/config");
 const client = require("twilio")(accountSid, authToken);
 
