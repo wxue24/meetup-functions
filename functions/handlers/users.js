@@ -144,16 +144,20 @@ exports.checkOTP = (req, res) => {
 };
 
 //TODO Client side validation (fields empty and school)
-exports.register = (req, res) => {
+exports.updateUserDetails = (req, res) => {
   const data = req.body;
-  db.doc(`/users/${req.user.handle}`).update(data).then(() => {
-    return res.status(200).json({message: "Successfully added data"})
-  }).catch(err => {
-    console.log(err)
-    return res.status(500).json({error: err.code})
-  })
+  db.doc(`/users/${req.user.handle}`)
+    .update(data)
+    .then(() => {
+      return res.status(200).json({ message: "Successfully added data" });
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json({ error: err.code });
+    });
 };
 
+// Or just get location 
 exports.validateAddress = async (req, res) => {
   const address = req.body;
   const validated = await isLocation(address);
@@ -161,10 +165,35 @@ exports.validateAddress = async (req, res) => {
   else {
     //TODO Add location to firebase
     const handle = req.user.handle;
-    console.log(handle);
-    return res.status(200).json({ message: "Successfully added address!" });
+    db.doc(`/users/${handle}`)
+      .update({
+        location: address,
+      })
+      .then(() => {
+        return res.status(200).json({ message: "Successfully added address" });
+      })
+      .catch((err) => {
+        return res.status(500).json({ error: err.code });
+      });
   }
 };
+
+exports.addLocation = (req, res) => {
+  const latitude = req.body.latitude
+  const longitude = req.body.longitude
+  const handle = req.user.handle
+
+  db.doc(`/users/${handle}`).update({
+    location: {
+      latitude,
+      longitude
+    }
+  }).then(() => {
+    return res.status(200).json({message: "Successfully added location"})
+  }).catch(err => {
+    return res.status(500).json({error: err.code})
+  })
+}
 
 //Returns error or adds handle to firebase
 exports.addInstagramHandle = async (req, res) => {
@@ -218,5 +247,4 @@ exports.addInstagramHandle = async (req, res) => {
     });
 };
 
-
-exports.editUserDetails = (req, res) => {};
+exports.getMatches = (req, res) => {};

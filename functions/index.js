@@ -9,9 +9,9 @@ const {
   login,
   sendOTP,
   checkOTP,
-  register,
+  updateUserDetails,
   validateAddress,
-  editUserDetails,
+  addLocation,
   addInstagramHandle,
 } = require("./handlers/users");
 
@@ -19,9 +19,10 @@ app.post("/signup", signup);
 app.post("/login", login);
 app.post("/sendOTP", sendOTP);
 app.post("/checkOTP", checkOTP);
-app.post("/register", FBAuth, register);
+app.post("/userDetails", FBAuth, updateUserDetails);
 app.post("/address", FBAuth, validateAddress);
+app.post("/location", FBAuth, addLocation)
 app.post("/instagram", FBAuth, addInstagramHandle);
-app.post("/edit", FBAuth, editUserDetails);
+
 
 exports.api = functions.https.onRequest(app);

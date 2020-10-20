@@ -93,9 +93,9 @@ exports.isLocation = (location) => {
     method: "post",
     url: "https://onlinetools.ups.com/addressvalidation/v1/1",
     headers: {
-      AccessLicenseNumber: UPSConfig.AccessLicenseNumber,
-      Username: UPSConfig.Username,
-      Password: UPSConfig.Password,
+      AccessLicenseNumber: ups.AccessLicenseNumber,
+      Username: ups.Username,
+      Password: ups.Password,
     },
     data: data,
   };
@@ -109,7 +109,6 @@ exports.isLocation = (location) => {
       else return null;
     })
     .catch((err) => {
-      console.log(err.message);
       console.log(err.response.data.response.errors)
       return null;
     });
