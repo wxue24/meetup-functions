@@ -27,6 +27,10 @@ const isPhone = (phone) => {
     });
 };
 
+const isSchool = school => {
+  
+}
+
 exports.validateSignupData = (data) => {
   let errors = {};
   if (isEmpty(data.email)) {
@@ -80,9 +84,6 @@ exports.validatePhone = async (phone) => {
 exports.reduceUserDetails = async (data) => {
   let errors = {};
   let userDetails = data
-  
-  // if (Object.keys(data.socialMediaHandles) === 0)
-  //   errors.socialMediaHandles = "Must have at least one social media account";
 
   return {
     errors,

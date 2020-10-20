@@ -4,6 +4,7 @@ const {
   firebaseConfig,
   twilio: { accountSid, authToken },
   instagram: { clientId, clientSecret, redirectUri },
+  instagram,
 } = require("../util/config");
 
 const axios = require("axios");
@@ -162,8 +163,8 @@ exports.validateAddress = async (req, res) => {
   }
 };
 
-//Returns res.body.handle 
-exports.getInstagramHandle = async (req, res) => {
+//Returns error or adds handle to firebase
+exports.addInstagramHandle = async (req, res) => {
   const authCode = req.body.code;
 
   let data = {
@@ -171,10 +172,10 @@ exports.getInstagramHandle = async (req, res) => {
     client_secret: clientSecret,
     grant_type: "authorization_code",
     redirect_uri: redirectUri,
-    code: authCode
-  }
+    code: authCode,
+  };
 
-  return axios({
+  const instagramHandle = await axios({
     url: "https://api.instagram.com/oauth/access_token",
     method: "post",
     data: querystring.stringify(data),
@@ -192,12 +193,27 @@ exports.getInstagramHandle = async (req, res) => {
       });
     })
     .then((response) => {
-      return res.status(200).json({ handle: response.data.username });
+      return response.data.username;
     })
     .catch((err) => {
       console.log(err.response.data);
       return res.status(400).json({ error: err.message });
     });
+
+  //Add to firebase
+  db.doc(`/users/${req.user.handle}`)
+    .update({
+      socialMediaHandles: {
+        instagram: instagramHandle,
+      },
+    })
+    .then(() => {
+      return res.status(200).json({ message: "Added instagram username" });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.code });
+    });
 };
+
 
 exports.editUserDetails = (req, res) => {};
