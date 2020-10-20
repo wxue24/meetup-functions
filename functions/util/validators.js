@@ -27,10 +27,6 @@ const isPhone = (phone) => {
     });
 };
 
-const isSchool = school => {
-  
-}
-
 exports.validateSignupData = (data) => {
   let errors = {};
   if (isEmpty(data.email)) {
@@ -77,18 +73,6 @@ exports.validatePhone = async (phone) => {
     errors,
     valid: Object.keys(errors).length > 0 ? false : true,
     number,
-  };
-};
-
-//TODO Client side validation: Empty fields
-exports.reduceUserDetails = async (data) => {
-  let errors = {};
-  let userDetails = data
-
-  return {
-    errors,
-    valid: Object.keys(errors).length > 0 ? false : true,
-    userDetails
   };
 };
 

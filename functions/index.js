@@ -13,16 +13,15 @@ const {
   validateAddress,
   editUserDetails,
   addInstagramHandle,
-  addInstagramHandle
 } = require("./handlers/users");
 
 app.post("/signup", signup);
 app.post("/login", login);
-app.post("/:handle/sendOTP", sendOTP);
-app.post("/:handle/checkOTP", checkOTP);
-app.post("/:handle/register", FBAuth, register);
-app.post("/:handle/address", FBAuth, validateAddress);
-app.post("/:handle/instagram", FBAuth, addInstagramHandle);
-app.post("/:handle/edit", FBAuth, editUserDetails);
+app.post("/sendOTP", sendOTP);
+app.post("/checkOTP", checkOTP);
+app.post("/register", FBAuth, register);
+app.post("/address", FBAuth, validateAddress);
+app.post("/instagram", FBAuth, addInstagramHandle);
+app.post("/edit", FBAuth, editUserDetails);
 
 exports.api = functions.https.onRequest(app);

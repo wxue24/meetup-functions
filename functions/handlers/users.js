@@ -143,12 +143,15 @@ exports.checkOTP = (req, res) => {
     });
 };
 
-exports.register = async (req, res) => {
+//TODO Client side validation (fields empty and school)
+exports.register = (req, res) => {
   const data = req.body;
-
-  const { valid, errors, userDetails } = await reduceUserDetails(data);
-  if (!valid) return res.status(400).json(errors);
-  else return res.status(200).json(userDetails);
+  db.doc(`/users/${req.user.handle}`).update(data).then(() => {
+    return res.status(200).json({message: "Successfully added data"})
+  }).catch(err => {
+    console.log(err)
+    return res.status(500).json({error: err.code})
+  })
 };
 
 exports.validateAddress = async (req, res) => {
