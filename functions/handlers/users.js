@@ -1,24 +1,29 @@
+const axios = require("axios");
+const querystring = require("querystring");
+
+const firebase = require("firebase");
+const geofirestore = require("geofirestore");
+
 const { admin, db } = require("../util/admin");
 
 const {
   firebaseConfig,
   twilio: { accountSid, authToken },
   instagram: { clientId, clientSecret, redirectUri },
-  instagram,
 } = require("../util/config");
 
-const axios = require("axios");
-const querystring = require("querystring");
-
-const firebase = require("firebase");
 firebase.initializeApp(firebaseConfig);
+// Create a GeoFirestore reference
+const geoDb = geofirestore.initializeApp(db);
+// Create a GeoCollection reference
+const geocollection = geoDb.collection("people");
 
 const {
   validateLoginData,
   validateSignupData,
   validatePhone,
-  reduceUserDetails,
   isLocation,
+  validateUserDetails,
 } = require("../util/validators");
 
 const client = require("twilio")(accountSid, authToken);
@@ -144,8 +149,11 @@ exports.checkOTP = (req, res) => {
 };
 
 //TODO Client side validation (fields empty and school)
+// make sure gradeAbove and gradeBelow reflect user's grade
+// possible grades are 7-16
+// radius in kilometers
 exports.updateUserDetails = (req, res) => {
-  const data = req.body;
+  const data = validateUserDetails(req.body);
   db.doc(`/users/${req.user.handle}`)
     .update(data)
     .then(() => {
@@ -157,7 +165,7 @@ exports.updateUserDetails = (req, res) => {
     });
 };
 
-// Or just get location 
+// Or just get location
 exports.validateAddress = async (req, res) => {
   const address = req.body;
   const validated = await isLocation(address);
@@ -178,22 +186,37 @@ exports.validateAddress = async (req, res) => {
   }
 };
 
-exports.addLocation = (req, res) => {
-  const latitude = req.body.latitude
-  const longitude = req.body.longitude
-  const handle = req.user.handle
+exports.addLocation = async (req, res) => {
+  const latitude = req.body.latitude;
+  const longitude = req.body.longitude;
+  const handle = req.user.handle;
 
-  db.doc(`/users/${handle}`).update({
-    location: {
-      latitude,
-      longitude
-    }
-  }).then(() => {
-    return res.status(200).json({message: "Successfully added location"})
-  }).catch(err => {
-    return res.status(500).json({error: err.code})
-  })
-}
+  // Add a GeoDocument to GeoCollection
+  const gRef = await geocollection
+    .add({
+      handle,
+      coordinates: new admin.firestore.GeoPoint(latitude, longitude),
+    })
+    .then((doc) => {
+      return doc.id;
+    })
+    .catch((err) => console.log(err));
+
+  db.doc(`/users/${handle}`)
+    .update({
+      location: {
+        latitude,
+        longitude,
+        gRef,
+      },
+    })
+    .then(() => {
+      return res.status(200).json({ message: "Successfully added location" });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.code });
+    });
+};
 
 //Returns error or adds handle to firebase
 exports.addInstagramHandle = async (req, res) => {
@@ -240,11 +263,44 @@ exports.addInstagramHandle = async (req, res) => {
       },
     })
     .then(() => {
-      return res.status(200).json({ message: "Added instagram username" });
+      return res.status(200).json({ handle: instagramHandle });
     })
     .catch((err) => {
       return res.status(500).json({ error: err.code });
     });
 };
 
-exports.getMatches = (req, res) => {};
+exports.getMatches = (req, res) => {
+  const usersRef = db.collection("users");
+  const {
+    maxGrade,
+    minGrade,
+    radius,
+    sameSchool,
+    sharedInterest,
+  } = req.user.filterSettings;
+  const { latitude, longitude } = req.user.location;
+  const { school, interests } = req.user;
+
+  const geoQuery = geocollection
+    .near({
+      center: new firebase.firestore.GeoPoint(latitude, longitude),
+      radius: radius,
+    })
+    .limit(100);
+
+  if (sharedInterest) {
+    const query = usersRef.where("interests", "array-contains", sharedInterest);
+  } else {
+    const query = usersRef.where("interests", "array-contains-any", interests);
+  }
+  if (sameSchool === "yes") {
+    const query = usersRef.where("school", "==", school);
+  } else if (sameSchool === "no") {
+    //Can't do this
+    const query = usersRef.where("school", "!=", school);
+  }
+  const query = usersRef
+    .where("grade", "<=", maxGrade)
+    .where("grade", ">=", minGrade);
+};

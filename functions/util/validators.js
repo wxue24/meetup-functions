@@ -59,16 +59,13 @@ exports.validatePhone = async (phone) => {
   let errors = {};
   let number = null;
 
-  if (isEmpty(phone)) {
-    return { ...data, error: "Must not be empty" };
+  const formatedNumber = await isPhone(phone);
+  if (!formatedNumber) {
+    errors.phone = "Number is not valid";
   } else {
-    const formatedNumber = await isPhone(phone);
-    if (!formatedNumber) {
-      errors.phone = "Number is not valid";
-    } else {
-      number = formatedNumber;
-    }
+    number = formatedNumber;
   }
+
   return {
     errors,
     valid: Object.keys(errors).length > 0 ? false : true,
@@ -99,17 +96,38 @@ exports.isLocation = (location) => {
     },
     data: data,
   };
-  //If valid or close to valid returns the address in AddressKeyFormat 
+  //If valid or close to valid returns the address in AddressKeyFormat
   //Else returns null
   return axios(config)
     .then((res) => {
-      if (res.data.XAVResponse.ValidAddressIndicator === ""){
-        return res.data.XAVResponse.Candidate.AddressKeyFormat
-      }
-      else return null;
+      if (res.data.XAVResponse.ValidAddressIndicator === "") {
+        return res.data.XAVResponse.Candidate.AddressKeyFormat;
+      } else return null;
     })
     .catch((err) => {
-      console.log(err.response.data.response.errors)
+      console.log(err.response.data.response.errors);
       return null;
     });
+};
+
+exports.validateUserDetails = (data) => {
+  // grades 9-16
+  const userDetails = data;
+  const grade = data.grade;
+  let maxGrade = data.filterSettings.maxGrade;
+  let minGrade = data.filterSettings.minGrade;
+
+  if (grade >= 9 && grade <= 12) {
+    if (maxGrade >= 12) maxGrade = 12;
+    if (maxGrade < grade) maxGrade = grade;
+    if (minGrade <= 9) minGrade = 9;
+    if (minGrade > grade) minGrade = grade;
+  } else {
+  }
+  userDetails.filterSettings.maxGrade = maxGrade;
+  userDetails.filterSettings.minGrade = minGrade;
+
+  let radius = data.filterSettings.radius;
+  userDetails.filterSettings.radius = radius * 1.6;
+  return userDetails;
 };

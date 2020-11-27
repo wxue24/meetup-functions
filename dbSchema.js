@@ -13,15 +13,13 @@ let db = {
         address: "112 Indian Hill Blvd",
         city: "Claremont",
         state: "CA",
-        zip: "91711",
+        zip: 91711,
       },
-      interests: {
-        sports: ["soccer", "basketball"],
-        art: ["painting", "photography"],
-        music: ["guitar", "piano"],
-        nature: ["astronomy", "bird-watching"],
-        other: ["cooking", "board games"],
-      },
+      interests: [ 
+        // Limit 10 if using firebase
+        { name: "soccer", type: "sports" },
+        { name: "board games", type: "other" },
+      ],
       socialMediaHandles: {
         instagram: "user123",
       },
@@ -49,11 +47,11 @@ let db = {
         },
       ],
       filterSettings: {
-        gradeAboveMax: "1",
-        gradeBelowMax: "1",
-        sameSchool: "Yes | Any | No",
-        radius: "2", // 1,2,3,4,5+
-        sharedInterest: "soccer", //specific interest or any
+        maxGrade: 12,
+        minGrade: 10,
+        sameSchool: "yes | any | no",
+        radius: 2, // 1,2,3,4,5 in miles
+        sharedInterest: {name: "soccer", type: "sports"} | null, //specific interest or any
       },
     },
   ],
@@ -120,10 +118,10 @@ const userDetails = {
     },
   ],
   filterSettings: {
-    gradeAboveMax: "1",
-    gradeBelowMax: "1",
-    sameSchool: "Yes | Any | No",
-    radius: "2", // 1,2,3,4,5+
+    maxGrade: 12,
+    minGrade: 10,
+    sameSchool: "yes | any | no",
+    radius: 2, // 1,2,3,4,5+
     sharedInterest: "soccer", //specific interest or any
   },
 };
