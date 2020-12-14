@@ -64,3 +64,6 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+# GCP service account key
+meetup-462d1-bca6d7fed924.json
