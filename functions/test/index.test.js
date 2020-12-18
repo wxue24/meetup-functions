@@ -7,7 +7,6 @@ const test = require("firebase-functions-test")(
   "meetup-462d1-bca6d7fed924.json"
 );
 
-const { getExpectedBodyHash } = require("twilio/lib/webhooks/webhooks");
 const myFunctions = require("../index.js");
 
 describe("Meetup functions", () => {
@@ -66,7 +65,7 @@ describe("Meetup functions", () => {
   // it("checks correct OTP", async () => {
   //   const data = {
   //     // Current OTP
-  //     OTP: "861617",
+  //     OTP: "639375",
   //     phone: "+19099649258",
   //   };
   //   await checkOTP(data).then((result) => {

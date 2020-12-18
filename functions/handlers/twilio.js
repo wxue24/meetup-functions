@@ -9,14 +9,14 @@ exports.sendOTP = async (data, context) => {
 
   const { errors, valid, number } = await validatePhone(phoneNumber);
   if (!valid)
-    return new functions.https.HttpsError(
+    throw new functions.https.HttpsError(
       "failed-precondition",
       "Number is not valid",
       `${errors}`
     );
 
   return client.verify
-    .services("VAb51a99dc6d48c612a24deb5e0180cb62")
+    .services("VA9c4ed233063f9b856f7ff7bcef09eda8")
     .verifications.create({ to: number, channel: "sms" })
     .then((verification) => {
       return { phone: number };
@@ -35,7 +35,7 @@ exports.checkOTP = (data, context) => {
   const phone = data.phone;
 
   return client.verify
-    .services("VAb51a99dc6d48c612a24deb5e0180cb62")
+    .services("VA9c4ed233063f9b856f7ff7bcef09eda8")
     .verificationChecks.create({ to: phone, code: OTP })
     .then((verification_check) => {
       console.log(verification_check.status);
@@ -43,6 +43,7 @@ exports.checkOTP = (data, context) => {
       return { status: verification_check.status };
     })
     .catch((err) => {
+      console.log(err);
       throw new functions.https.HttpsError(
         "unknown",
         "Something went wrong",
